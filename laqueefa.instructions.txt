@@ -1,0 +1,9 @@
+Open up a terminal and run:
+
+$ watch -d -n 0.5 gpio readall
+
+and then open another terminal and run:
+
+$ sudo Desktop/laqueefa.brains.sh
+
+Note that laqueefa.brains.sh may be starting up from rc.local, so you may have two competing scripts. You can resolve this by running ps aux and grepping for laqueefa. Kill any procs that might be competing with the one you're trying to run from the shell.
