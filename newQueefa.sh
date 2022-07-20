@@ -1,6 +1,26 @@
 #!/bin/bash
 
-#setup drink dispensor, LEDs and input buttons to there associated gpio
+# Adjust time needed to poor a drink, in seconds
+poorTime=5
+
+# buttons are regularly open so initialize allselections to zeros
+# number of zeros depends on number of inputs. We are using 8 total.
+#
+noSelectionsMade=00000000
+allselections=$noSelectionsMade
+
+#***********************************************
+# Setup drink dispensor, LEDs and input buttons to there associated gpio.
+# Input/Output values can be set to whatever gpio you want and will be setup 
+# with the function 'setupGPIOs'. The arrays 'gpioInputs' and so on need to 
+# be seperated depending on if they are inputs or outputs and what intitial
+# output value is desired
+
+#☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺
+# inputs
+#☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺
+ogButtonsInSeries=17 # this is used when all the buttons are in series
+
 button0=12  # laqueefa buttons
 button1=16  # "
 button2=20  # "
@@ -11,24 +31,63 @@ button5=15  # "
 button6=18  # "
 button7=23  # "
 
-bypassSwitch=24   # bypass switch turns off laqueffa buttons
+remote0=24
+remote1=25
+remote2=8 
+remote3=7 
 
-drink0=5    # Relays used for pooring drinks
+bypassSwitch=27   # bypass switch turns off laqueffa buttons
+
+#☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺
+# outputs
+#☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺☺
+
+drink0=5    # relays used for pooring drinks
 drink1=6    # "
 drink2=13   # "
 
-queefaSquirt=19
+queefaSquirt=19 # relay used for the ol' squirt party
 
 ledDisplay0=2
 ledDisplay1=3
 ledDisplay2=4
 
-# Adjust time needed to poor a drink, in seconds
-poorTime=5
+#♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥
+# here are the arrays used to setup
+#♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥
+gpioPussyInputs="$button0 $button1 $button2 $button3 $ogButtonsInSeries"
+gpioBackupPussyInputs="$button4 $button5 $button6 $button7"
+gpioRemoteInputs="remote0 remote1 remote2 remote3"
 
-# buttons are regularly open so initialize allselections to 0000
-allselections=0000
+gpioOutputsPumps="$drink0 $drink1 $drink2 $queefaSquirt"
+gpioOutputsLed="$ledDisplay0 $ledDisplay1 $ledDisplay2"
 
+# setup gpios for all inputs and outputs
+function setupGPIOs() {
+   gpioNum=$1
+   inOut=$2
+   highLow=$3
+   #for i in $gpioNum; do
+   #   echo $i > /sys/class/gpio/export 
+   #   echo $inOut > /sys/class/gpio/gpio${i}/direction
+   #   if [ "$inOut" == "out" } ; then
+   #      echo $highLow > /sys/class/gpio/gpio${i}/value
+   #   fi
+   #done
+   echo "GPIO Number: "$gpioNum
+   echo "In or Out: "$inOut
+   echo "High or Low: "$highLow
+}
+
+setupGPIOs $gpioInputs "in" 
+setupGPIOs $gpioBackupPussyInputs "in"
+setupGPIOs $gpioRemoteInputs "in"
+setupGPIOs $gpioOutputsPumps "out" 1
+setupGPIOs $gpioOutputsLed "out" 0
+#***********************************************
+
+# this was used when all pussy buttons were in series so all 
+# buttons were ited to one input
 function randomDrink(){
    randomNumber=$((1 + RANDOM % 13))
 	echo -e "RANDOM NUMBER IS  $randomNumber\n"
@@ -58,16 +117,30 @@ function selectDrink() {
    allselections=$1
    
    case $allselections in
-      0001)
+      # remote selections 
+      00000001)
             drank=$drink0
 			   ledDisplay=$ledDisplay0;;
-      0010)
+      00000010)
 				drank=$drink1
 				ledDisplay=$ledDisplay0;;
-	   0100)
+	   00000100)
 				drank=$drink2
 				ledDisplay=$ledDisplay0;;
-		1000)
+		00001000)
+				drank=$queefaSquirt
+				ledDisplay=$ledDisplay1;;
+      # pussy button selections
+      00010000)
+            drank=$drink0
+			   ledDisplay=$ledDisplay0;;
+      00100000)
+				drank=$drink1
+				ledDisplay=$ledDisplay0;;
+	   01000000)
+				drank=$drink2
+				ledDisplay=$ledDisplay0;;
+		10000000)
 				drank=$queefaSquirt
 				ledDisplay=$ledDisplay1;;
          *) echo "false alarm" 
@@ -120,7 +193,7 @@ function activateSquirt() {
 	sleep 5		
 	echo 0 > /sys/class/gpio/gpio$drank/value
 	sleep 2
-	#mplayer /home/pi/Desktop/Sounds_of_La_Queefa/sad.trombone.mp3 & 
+	mplayer /home/pi/Desktop/Sounds_of_La_Queefa/sad.trombone.mp3 & 
 	echo 0 > /sys/class/gpio/gpio$ledDisplay/value
 	echo 1 > /sys/class/gpio/gpio$drank/value
    sleep 0.5 
@@ -133,26 +206,31 @@ function activateSquirt() {
    echo > 1 /sys/class/gpio/gpio$drank/value
 }
 
-function main() {
-   allselections=0000
+function waitForPussyPlay() {
+   allselections=$noSelectionsMade
+   bypass=$(gpio -g read $bypassSwitch)
    # loop forever
    while true ; do
    
       if [ $bypass -eq 0 ] ; then
-         #wait for laqueefa button drink selection
-         while [ $allselections -eq 0000 ] && [ $bypass -eq 0 ]; do
-            selection0=$(gpio -g read $button0)
-            selection1=$(gpio -g read $button1)
-            selection2=$(gpio -g read $button2)
-            selection3=$(gpio -g read $button3)
+         #wait for laqueefa's pussy buttons, bypass toggle or remote control
+         while [ $allselections -eq $noSelectionsMade ] && [ $bypass -eq 0 ]; do
+            s0=$(gpio -g read $button0)
+            s1=$(gpio -g read $button1)
+            s2=$(gpio -g read $button2)
+            s3=$(gpio -g read $button3)
+            s4=$(gpio -g read $remote0)
+            s5=$(gpio -g read $remote1)
+            s6=$(gpio -g read $remote2)
+            s7=$(gpio -g read $remote3)
             bypass=$(gpio -g read $bypassSwitch)
-            allselections=${selection0}${selection1}${selection2}${selection3}
+            allselections=${s0}${s1}${s2}${s3}${s4}${s5}${s6}${s7}
          done
-         # bypass switch was toggled. go to top 
+         # if bypass switch was toggled go back to main 
          if [ $bypass -eq 1 ] ; then main; fi
-         # a drink button was pressed so select drink to pour
+         # if not a drink button was pressed so select drink to pour
          selectDrink $allselections
-         allselections=0000
+         allselections=$noSelectionsMade
          # if laqueefa decides to squirt, ledDisplay the sad trumbone song
          if [ $drank -eq $queefaSquirt ] ; then
             activateSquirt
@@ -161,19 +239,24 @@ function main() {
             poorDrink $drank $ledDisplay
          fi
       else  
-         while [ $allselections -eq 0000 ] && [ $bypass -eq 1 ]; do
-            selection0=$(gpio -g read $button4)
-            selection1=$(gpio -g read $button5)
-            selection2=$(gpio -g read $button6)
-            selection3=$(gpio -g read $button7)
+         #wait for rear buttons, bypass toggle or remote control
+         while [ $allselections -eq $noSelectionsMade ] && [ $bypass -eq 1 ]; do
+            s0=$(gpio -g read $button4)
+            s1=$(gpio -g read $button5)
+            s2=$(gpio -g read $button6)
+            s3=$(gpio -g read $button7)
+            s4=$(gpio -g read $remote0)
+            s5=$(gpio -g read $remote1)
+            s6=$(gpio -g read $remote2)
+            s7=$(gpio -g read $remote3)
             bypass=$(gpio -g read $bypassSwitch)
-            allselections=${selection0}${selection1}${selection2}${selection3}
+            allselections=${s0}${s1}${s2}${s3}${s4}${s5}${s6}${s7}
          done
          # bypass switch was toggled. go to top 
-         if [ $bypass -eq 0 ] ; then main; fi
+         #if [ $bypass -eq 0 ] ; then main; fi
          # a drink button was pressed so select drink to pour
          selectDrink $allselections
-         allselections=0000
+         allselections=$noSelectionsMade
          # if laqueefa decides to squirt, ledDisplay the sad trumbone song
          if [ $drank -eq $queefaSquirt ] ; then
             activateSquirt
@@ -185,5 +268,15 @@ function main() {
 
    
    done
+}
+
+function main() {
+
+   while true ; do
+      waitForPussyPlay
+   done
    
 }
+
+#start program from main
+main

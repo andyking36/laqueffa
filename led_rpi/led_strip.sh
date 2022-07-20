@@ -6,9 +6,10 @@ echo 4 > /sys/class/gpio/export
 echo in > /sys/class/gpio/gpio2/direction
 echo in > /sys/class/gpio/gpio3/direction
 echo in > /sys/class/gpio/gpio4/direction
-let randomnumber 
 
-sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python /home/pi/rpi_ws281x/python/examples/default_lights.py & 
+PYTHONSCRIPTDIR=/home/pi/rpi_ws281x/python/examples 
+$PYTHONSCRIPTDIR
+sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python $PYTHONSCRIPTDIR/default_lights.py & 
 
 while [ true ] 
 do 
@@ -27,10 +28,10 @@ do
 			4)
 				script=drank_03.py;;
 		esac
-		sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python /home/pi/rpi_ws281x/python/examples/$script & 
+		sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python $PYTHONSCRIPTDIR/$script & 
         	sleep 10
 		sudo pkill python
-		sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python /home/pi/rpi_ws281x/python/examples/default_lights.py & 
+		sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python $PYTHONSCRIPTDIR/default_lights.py & 
 	fi
 
 	if [ $(gpio -g read 3) = 1 ]
@@ -38,19 +39,19 @@ do
 		echo "squirt time"
 		sudo pkill python
 		script=squirt.py
-		sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python /home/pi/rpi_ws281x/python/examples/$script & 
+		sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python $PYTHONSCRIPTDIR/$script & 
         	sleep 2
 		sudo pkill python
 		script=blink_red.py
-		sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python /home/pi/rpi_ws281x/python/examples/$script & 
+		sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python $PYTHONSCRIPTDIR/$script & 
         	sleep 3
 		sudo pkill python
 		script=sections.py
-		sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python /home/pi/rpi_ws281x/python/examples/$script & 
+		sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python $PYTHONSCRIPTDIR/$script & 
         	sleep 5
 		sudo pkill python
 		
-		sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python /home/pi/rpi_ws281x/python/examples/default_lights.py & 
+		sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python $PYTHONSCRIPTDIR/default_lights.py & 
 	
 	fi
 done
