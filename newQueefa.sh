@@ -67,7 +67,8 @@ function setupGPIOs() {
    gpioNum=$1
    inOut=$2
    highLow=$3
-   for i in $gpioNum; do
+   echo "GPIO: $gpioNum, inOUT: $inOut, highLow: $highLow"
+   for i in $gpioNum ; do
       echo $i > /sys/class/gpio/export 
       echo $inOut > /sys/class/gpio/gpio${i}/direction
       if [ "$inOut" == "out" } ; then
@@ -77,13 +78,14 @@ function setupGPIOs() {
    echo "GPIO Number: "$gpioNum
    echo "In or Out: "$inOut
    echo "High or Low: "$highLow
+   sleep 1
 }
 
-setupGPIOs $gpioPussyInputs "in" 
-setupGPIOs $gpioBackupPussyInputs "in"
-setupGPIOs $gpioRemoteInputs "in"
-setupGPIOs $gpioOutputsPumps "out" 1
-setupGPIOs $gpioOutputsLed "out" 0
+setupGPIOs "$gpioPussyInputs" "in" 
+setupGPIOs "$gpioBackupPussyInputs" "in"
+setupGPIOs "$gpioRemoteInputs" "in"
+setupGPIOs "$gpioOutputsPumps" "out" 1
+setupGPIOs "$gpioOutputsLed" "out" 0
 #***********************************************
 
 # this was used when all pussy buttons were in series so all 
