@@ -79,7 +79,7 @@ function setupGPIOs() {
    echo "High or Low: "$highLow
 }
 
-setupGPIOs $gpioInputs "in" 
+setupGPIOs $gpioPussyInputs "in" 
 setupGPIOs $gpioBackupPussyInputs "in"
 setupGPIOs $gpioRemoteInputs "in"
 setupGPIOs $gpioOutputsPumps "out" 1
