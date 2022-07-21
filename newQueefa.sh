@@ -71,7 +71,8 @@ function setupGPIOs() {
    for i in $gpioNum ; do
       echo $i > /sys/class/gpio/export 
       echo $inOut > /sys/class/gpio/gpio${i}/direction
-      if [ "$inOut" == "out" } ; then
+      
+      if [ "$inOut" == "out" ] ; then
          echo $highLow > /sys/class/gpio/gpio${i}/value
       fi
    done
@@ -233,7 +234,7 @@ function waitForPussyPlay() {
             s6=$(gpio -g read $remote2)
             s7=$(gpio -g read $remote3)
             bypass=$(gpio -g read $bypassSwitch)
-            allselections=${s0}${s1}${s2}${s3}${s4}${s5}${s6}${s7}
+            allselections=${s7}${s6}${s5}${s4}${s3}${s2}${s1}${s0}
             echo "T0 allselections: $allselections bypass $bypass"
          done
          # if bypass switch was toggled go back to main 
@@ -260,7 +261,7 @@ function waitForPussyPlay() {
             s6=$(gpio -g read $remote2)
             s7=$(gpio -g read $remote3)
             bypass=$(gpio -g read $bypassSwitch)
-            allselections=${s0}${s1}${s2}${s3}${s4}${s5}${s6}${s7}
+            allselections=${s7}${s6}${s5}${s4}${s3}${s2}${s1}${s0}
             echo "T1 allselections: $allselections bypass $bypass"
          done
          # bypass switch was toggled. go to top 
