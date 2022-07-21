@@ -67,13 +67,13 @@ function setupGPIOs() {
    gpioNum=$1
    inOut=$2
    highLow=$3
-   #for i in $gpioNum; do
-   #   echo $i > /sys/class/gpio/export 
-   #   echo $inOut > /sys/class/gpio/gpio${i}/direction
-   #   if [ "$inOut" == "out" } ; then
-   #      echo $highLow > /sys/class/gpio/gpio${i}/value
-   #   fi
-   #done
+   for i in $gpioNum; do
+      echo $i > /sys/class/gpio/export 
+      echo $inOut > /sys/class/gpio/gpio${i}/direction
+      if [ "$inOut" == "out" } ; then
+         echo $highLow > /sys/class/gpio/gpio${i}/value
+      fi
+   done
    echo "GPIO Number: "$gpioNum
    echo "In or Out: "$inOut
    echo "High or Low: "$highLow
@@ -89,6 +89,7 @@ setupGPIOs $gpioOutputsLed "out" 0
 # this was used when all pussy buttons were in series so all 
 # buttons were ited to one input
 function randomDrink(){
+   echo "randomDrink"
    randomNumber=$((1 + RANDOM % 13))
 	echo -e "RANDOM NUMBER IS  $randomNumber\n"
 	case $randomNumber in
@@ -114,8 +115,9 @@ function randomDrink(){
 }
 
 function selectDrink() {
-   allselections=$1
    
+   allselections=$1
+   echo "selectDrink: $allselections"
    case $allselections in
       # remote selections 
       00000001)
@@ -150,6 +152,7 @@ function selectDrink() {
 }
 
 function playAudioClip(){
+   echo "playAudioClip"
    randomnumber=$((1 + RANDOM % 20))
 	echo -e "\nRECORDING NUMBER IS $randomnumber\n"
 	case $randomnumber in
@@ -178,8 +181,10 @@ function playAudioClip(){
 }
 
 function poorDrink() {
+   
    drank=$1
    ledDisplay=$2
+   echo "poorDrink: $drank $ledDisplay"
    sleep 2	
 	echo 1 > /sys/class/gpio/gpio$ledDisplay/value
 	echo 0 > /sys/class/gpio/gpio$drank/value
@@ -189,6 +194,7 @@ function poorDrink() {
 }
 
 function activateSquirt() {
+  echo "squirt time"
    echo 1 > /sys/class/gpio/gpio$ledDisplay/value
 	sleep 5		
 	echo 0 > /sys/class/gpio/gpio$drank/value
@@ -207,6 +213,7 @@ function activateSquirt() {
 }
 
 function waitForPussyPlay() {
+  echo "waitForPussyPlay"
    allselections=$noSelectionsMade
    bypass=$(gpio -g read $bypassSwitch)
    # loop forever
@@ -225,6 +232,7 @@ function waitForPussyPlay() {
             s7=$(gpio -g read $remote3)
             bypass=$(gpio -g read $bypassSwitch)
             allselections=${s0}${s1}${s2}${s3}${s4}${s5}${s6}${s7}
+            echo "T0 allselections: $allselections bypass $bypass"
          done
          # if bypass switch was toggled go back to main 
          if [ $bypass -eq 1 ] ; then main; fi
@@ -251,6 +259,7 @@ function waitForPussyPlay() {
             s7=$(gpio -g read $remote3)
             bypass=$(gpio -g read $bypassSwitch)
             allselections=${s0}${s1}${s2}${s3}${s4}${s5}${s6}${s7}
+            echo "T1 allselections: $allselections bypass $bypass"
          done
          # bypass switch was toggled. go to top 
          #if [ $bypass -eq 0 ] ; then main; fi
