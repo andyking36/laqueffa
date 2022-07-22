@@ -7,8 +7,8 @@ echo in > /sys/class/gpio/gpio2/direction
 echo in > /sys/class/gpio/gpio3/direction
 echo in > /sys/class/gpio/gpio4/direction
 
-PYTHONSCRIPTDIR=/home/pi/rpi_ws281x/python/examples 
-$PYTHONSCRIPTDIR
+PYTHONSCRIPTDIR=/home/laqueefa/led_patterns 
+
 sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python $PYTHONSCRIPTDIR/default_lights.py & 
 
 while [ true ] 
