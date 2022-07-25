@@ -37,10 +37,15 @@
 #define IRpin_PIN      PIND
 #define IRpin          2
 
-#define RED_BUTTON        0b00000010111111111110000000011111
-#define GREEN_BUTTON      0b00000010111111110110000010011111
-#define BLUE_BUTTON       0b00000010111111111010000001011111
-#define WHITE_BUTTON      0b00000010111111110010000011011111
+//#define DRANK_1      0b00000000111111110011000011001111
+//#define DRANK_2      0b00000000111111110001100011100111
+//#define DRANK_3      0b00000000111111110111101010000101
+//#define DRANK_4      0b00000000111111110001000011101111
+
+#define DRANK_1      0b00000000111111110001000011101111
+#define DRANK_2      0b00000000111111110111101010000101
+#define DRANK_3      0b00000000111111110001100011100111
+#define DRANK_4      0b00000000111111110011000011001111
 
 #define OUTPUT0 3
 #define OUTPUT1 4
@@ -65,6 +70,12 @@ void setup()
     pinMode(OUTPUT1, OUTPUT);
     pinMode(OUTPUT2, OUTPUT);
     pinMode(OUTPUT3, OUTPUT);
+    
+    digitalWrite(OUTPUT0, LOW);
+    digitalWrite(OUTPUT1, LOW);
+    digitalWrite(OUTPUT2, LOW);
+    digitalWrite(OUTPUT3, LOW);
+    
     Serial.begin(9600);
 #if defined(__AVR_ATmega32U4__) || defined(SERIAL_PORT_USBVIRTUAL) || defined(SERIAL_USB) /*stm32duino*/|| defined(USBCON) /*STM32_stm32*/|| defined(SERIALUSB_PID) || defined(ARDUINO_attiny3217)
     delay(4000); // To be able to connect Serial monitor after reset or power up and before first print out. Do not wait for an attached Serial Monitor!
@@ -184,29 +195,29 @@ void loop()
         {
             // NEC signal ended just now
             
-            if (inputIRCode == RED_BUTTON) {
-               Serial.println(" Red ");
+            if (inputIRCode == DRANK_1) {
+               Serial.println(" Drank 1 ");
                digitalWrite(OUTPUT0, HIGH);
                delay(ONTIME);           
                digitalWrite(OUTPUT0, LOW); 
             }
             
-            if (inputIRCode == GREEN_BUTTON) {
-               Serial.println(" Green ");
+            if (inputIRCode == DRANK_2) {
+               Serial.println(" Drank 2 ");
                digitalWrite(OUTPUT1, HIGH);
                delay(ONTIME);           
                digitalWrite(OUTPUT1, LOW); 
             }
             
-            if (inputIRCode == BLUE_BUTTON) {
-               Serial.println(" Blue ");
+            if (inputIRCode == DRANK_3) {
+               Serial.println(" Drank 3 ");
                digitalWrite(OUTPUT2, HIGH);
                delay(ONTIME);           
                digitalWrite(OUTPUT2, LOW); 
             }
             
-            if (inputIRCode == WHITE_BUTTON) {
-               Serial.println(" White ");
+            if (inputIRCode == DRANK_4) {
+               Serial.println(" Drank 4 ");
                digitalWrite(OUTPUT3, HIGH);
                delay(ONTIME);           
                digitalWrite(OUTPUT3, LOW); 
