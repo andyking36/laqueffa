@@ -9,6 +9,11 @@ poorTime=5
 noSelectionsMade=00000000
 allselections=$noSelectionsMade
 
+# track how many drinks are poored and activate squirt 
+# at "squirtTime"
+drinkCount=0
+squirtTime=5
+
 #***********************************************
 # Setup drink dispensor, LEDs and input buttons to there associated gpio.
 # Input/Output values can be set to whatever gpio you want and will be setup 
@@ -69,17 +74,16 @@ function setupGPIOs() {
    highLow=$3
    echo "GPIO: $gpioNum, inOUT: $inOut, highLow: $highLow"
    for i in $gpioNum ; do
-      echo $i > /sys/class/gpio/export 
+      if [ ! -d /sys/class/gpio/gpio${i} ] ; then
+         echo $i > /sys/class/gpio/export
+      fi
+
       echo $inOut > /sys/class/gpio/gpio${i}/direction
       
       if [ "$inOut" == "out" ] ; then
          echo $highLow > /sys/class/gpio/gpio${i}/value
       fi
    done
-   echo "GPIO Number: "$gpioNum
-   echo "In or Out: "$inOut
-   echo "High or Low: "$highLow
-   sleep 1
 }
 
 setupGPIOs "$gpioPussyInputs" "in" 
@@ -94,24 +98,24 @@ setupGPIOs "$gpioOutputsLed" "out" 0
 function randomDrink(){
    echo "randomDrink"
    randomNumber=$((1 + RANDOM % 13))
-	echo -e "RANDOM NUMBER IS  $randomNumber\n"
-	case $randomNumber in
-		1-4)
-			drank=$drink0
-		   ledDisplay=$ledDisplay0;;
-		5-8)
-			drank=$drink1
-			ledDisplay=$ledDisplay0;;
-		9-12)
-			drank=$drink2
-			ledDisplay=$ledDisplay0;;
-		13)
-			drank=$queefaSquirt
-			ledDisplay=$ledDisplay1;;
-      *) 
-         drank=$drink0
-		   ledDisplay=$ledDisplay0;;
-	esac
+   echo -e "RANDOM NUMBER IS  $randomNumber\n"
+   case $randomNumber in
+	1-4)
+	   drank=$drink0
+	   ledDisplay=$ledDisplay0;;
+	5-8)
+	   drank=$drink1
+	   ledDisplay=$ledDisplay0;;
+	9-12)
+	   drank=$drink2
+	   ledDisplay=$ledDisplay0;;
+	13)
+	   drank=$queefaSquirt
+	   ledDisplay=$ledDisplay1;;
+        *) 
+           drank=$drink0
+	   ledDisplay=$ledDisplay0;;
+   esac
    
    echo "Drank GPIO: "$drank
    echo "Random Num:" $randomNumber
@@ -124,30 +128,30 @@ function selectDrink() {
    case $allselections in
       # remote selections 
       00000001)
-            drank=$drink0
-			   ledDisplay=$ledDisplay0;;
+          drank=$drink0
+	  ledDisplay=$ledDisplay0;;
       00000010)
-				drank=$drink1
-				ledDisplay=$ledDisplay0;;
-	   00000100)
-				drank=$drink2
-				ledDisplay=$ledDisplay0;;
-		00001000)
-				drank=$queefaSquirt
-				ledDisplay=$ledDisplay1;;
+	  drank=$drink1
+	  ledDisplay=$ledDisplay0;;
+      00000100)
+	  drank=$drink2
+	  ledDisplay=$ledDisplay0;;
+      00001000)
+          drank=$queefaSquirt
+	  ledDisplay=$ledDisplay1;;
       # pussy button selections
       00010000)
-            drank=$drink0
-			   ledDisplay=$ledDisplay0;;
+          drank=$drink0
+	  ledDisplay=$ledDisplay0;;
       00100000)
-				drank=$drink1
-				ledDisplay=$ledDisplay0;;
-	   01000000)
-				drank=$drink2
-				ledDisplay=$ledDisplay0;;
-		10000000)
-				drank=$queefaSquirt
-				ledDisplay=$ledDisplay1;;
+	  drank=$drink1
+	  ledDisplay=$ledDisplay0;;
+      01000000)
+	  drank=$drink2
+	  ledDisplay=$ledDisplay0;;
+      10000000)
+	  drank=$queefaSquirt
+	  ledDisplay=$ledDisplay1;;
          *) echo "false alarm" 
             main;;
    esac
@@ -188,31 +192,31 @@ function poorDrink() {
    drank=$1
    ledDisplay=$2
    echo "poorDrink: $drank $ledDisplay"
-   sleep 2	
-	echo 1 > /sys/class/gpio/gpio$ledDisplay/value
-	echo 0 > /sys/class/gpio/gpio$drank/value
-	sleep 5
-	echo 0 > /sys/class/gpio/gpio$ledDisplay/value
-	echo 1 > /sys/class/gpio/gpio$drank/value
+   sleep 1	
+   echo 1 > /sys/class/gpio/gpio${ledDisplay}/value
+   echo 0 > /sys/class/gpio/gpio${drank}/value
+   sleep $poorTime
+   echo 0 > /sys/class/gpio/gpio${ledDisplay}/value
+   echo 1 > /sys/class/gpio/gpio${drank}/value
 }
 
 function activateSquirt() {
-  echo "squirt time"
-   echo 1 > /sys/class/gpio/gpio$ledDisplay/value
-	sleep 5		
-	echo 0 > /sys/class/gpio/gpio$drank/value
-	sleep 2
-	mplayer /home/pi/Desktop/Sounds_of_La_Queefa/sad.trombone.mp3 & 
-	echo 0 > /sys/class/gpio/gpio$ledDisplay/value
-	echo 1 > /sys/class/gpio/gpio$drank/value
+   echo "squirt time"
+   echo 1 > /sys/class/gpio/gpio${ledDisplay}/value
+   sleep 5		
+   echo 0 > /sys/class/gpio/gpio${drank}/value
+   sleep 2
+   mplayer /home/pi/Desktop/Sounds_of_La_Queefa/sad.trombone.mp3 & 
+   echo 0 > /sys/class/gpio/gpio${ledDisplay}/value
+   echo 1 > /sys/class/gpio/gpio${drank}/value
    sleep 0.5 
-	echo 0 > /sys/class/gpio/gpio$drank/value
-	sleep 0.2
-	echo 1 > /sys/class/gpio/gpio$drank/value
+   echo 0 > /sys/class/gpio/gpio${drank}/value
+   sleep 0.2
+   echo 1 > /sys/class/gpio/gpio${drank}/value
    sleep 0.4
-	echo 0 > /sys/class/gpio/gpio$drank/value
-	sleep 1.5
-   echo > 1 /sys/class/gpio/gpio$drank/value
+   echo 0 > /sys/class/gpio/gpio${drank}/value
+   sleep 1.5
+   echo 1 > /sys/class/gpio/gpio${drank}/value
 }
 
 function waitForPussyPlay() {
@@ -225,15 +229,15 @@ function waitForPussyPlay() {
       if [ $bypass -eq 0 ] ; then
          #wait for laqueefa's pussy buttons, bypass toggle or remote control
          while [ $allselections -eq $noSelectionsMade ] && [ $bypass -eq 0 ]; do
-            s0=$(gpio -g read $button0)
-            s1=$(gpio -g read $button1)
-            s2=$(gpio -g read $button2)
-            s3=$(gpio -g read $button3)
-            s4=$(gpio -g read $remote0)
-            s5=$(gpio -g read $remote1)
-            s6=$(gpio -g read $remote2)
-            s7=$(gpio -g read $remote3)
-            bypass=$(gpio -g read $bypassSwitch)
+            s0=$(cat /sys/class/gpio/gpio${button0}/value)
+            s1=$(cat /sys/class/gpio/gpio${button1}/value)
+            s2=$(cat /sys/class/gpio/gpio${button2}/value)
+            s3=$(cat /sys/class/gpio/gpio${button3}/value)
+            s4=$(cat /sys/class/gpio/gpio${remote0}/value)
+            s5=$(cat /sys/class/gpio/gpio${remote1}/value)
+            s6=$(cat /sys/class/gpio/gpio${remote2}/value)
+            s7=$(cat /sys/class/gpio/gpio${remote3}/value)
+            bypass=$(cat /sys/class/gpio/gpio${bypassSwitch})
             allselections=${s7}${s6}${s5}${s4}${s3}${s2}${s1}${s0}
             echo "T0 allselections: $allselections bypass $bypass"
          done
@@ -245,27 +249,34 @@ function waitForPussyPlay() {
          # if laqueefa decides to squirt, ledDisplay the sad trumbone song
          if [ $drank -eq $queefaSquirt ] ; then
             activateSquirt
-         else
-            playAudioClip
+         elif [ $drinkCount -gt $squirtTime ] ; then
+	    drank=$queefaSquirt
+	    ledDisplay=$ledDisplay1 
+            activateSquirt
+	    drinkCount=0
+	 else
+	    playAudioClip
             poorDrink $drank $ledDisplay
+	    let "drinkCount++"
          fi
+         
       else  
          #wait for rear buttons, bypass toggle or remote control
          while [ $allselections -eq $noSelectionsMade ] && [ $bypass -eq 1 ]; do
-            s0=$(gpio -g read $button4)
-            s1=$(gpio -g read $button5)
-            s2=$(gpio -g read $button6)
-            s3=$(gpio -g read $button7)
-            s4=$(gpio -g read $remote0)
-            s5=$(gpio -g read $remote1)
-            s6=$(gpio -g read $remote2)
-            s7=$(gpio -g read $remote3)
-            bypass=$(gpio -g read $bypassSwitch)
+            s0=$(cat /sys/class/gpio/gpio${button4}/value)
+            s1=$(cat /sys/class/gpio/gpio${button5}/value)
+            s2=$(cat /sys/class/gpio/gpio${button6}/value)
+            s3=$(cat /sys/class/gpio/gpio${button7}/value)
+            s4=$(cat /sys/class/gpio/gpio${remote0}/value)
+            s5=$(cat /sys/class/gpio/gpio${remote1}/value)
+            s6=$(cat /sys/class/gpio/gpio${remote2}/value)
+            s7=$(cat /sys/class/gpio/gpio${remote3}/value)
+            bypass=$(cat /sys/class/gpio/gpio${bypassSwitch})
             allselections=${s7}${s6}${s5}${s4}${s3}${s2}${s1}${s0}
             echo "T1 allselections: $allselections bypass $bypass"
          done
          # bypass switch was toggled. go to top 
-         #if [ $bypass -eq 0 ] ; then main; fi
+         if [ $bypass -eq 0 ] ; then main; fi
          # a drink button was pressed so select drink to pour
          selectDrink $allselections
          allselections=$noSelectionsMade
