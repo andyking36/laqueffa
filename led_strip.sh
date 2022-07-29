@@ -7,13 +7,13 @@ echo in > /sys/class/gpio/gpio2/direction
 echo in > /sys/class/gpio/gpio3/direction
 echo in > /sys/class/gpio/gpio4/direction
 
-PYTHONSCRIPTDIR=/home/laqueefa/led_patterns 
+PYTHONSCRIPTDIR=/home/laqueefa/Documents/laqueffa/led_patterns 
 
 sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python $PYTHONSCRIPTDIR/default_lights.py & 
 
 while [ true ] 
 do 
-	if [ $(gpio -g read 2) = 1 ] 
+	if [ $(cat /sys/class/gpio/gpio2/value) -eq 1 ] 
 	then
 		random_num=$((1 + RANDOM % 4))
 		echo "You found the clit. Nice work!"
@@ -34,7 +34,7 @@ do
 		sudo PYTHONPATH=".:build/lib.linux-armv71-2.7" python $PYTHONSCRIPTDIR/default_lights.py & 
 	fi
 
-	if [ $(gpio -g read 3) = 1 ]
+	if [ $(cat /sys/class/gpio/gpio3/value) -eq 1 ]
 	then	
 		echo "squirt time"
 		sudo pkill python

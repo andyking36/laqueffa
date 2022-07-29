@@ -250,14 +250,14 @@ function waitForPussyPlay() {
          if [ $drank -eq $queefaSquirt ] ; then
             activateSquirt
          elif [ $drinkCount -gt $squirtTime ] ; then
-	    drank=$queefaSquirt
-	    ledDisplay=$ledDisplay1 
+            drank=$queefaSquirt
+            ledDisplay=$ledDisplay1 
             activateSquirt
-	    drinkCount=0
-	 else
-	    playAudioClip
+            drinkCount=0
+         else
+            playAudioClip
             poorDrink $drank $ledDisplay
-	    let "drinkCount++"
+            let "drinkCount++"
          fi
          
       else  
