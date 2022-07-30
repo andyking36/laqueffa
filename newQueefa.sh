@@ -237,7 +237,7 @@ function waitForPussyPlay() {
             s5=$(cat /sys/class/gpio/gpio${remote1}/value)
             s6=$(cat /sys/class/gpio/gpio${remote2}/value)
             s7=$(cat /sys/class/gpio/gpio${remote3}/value)
-            bypass=$(cat /sys/class/gpio/gpio${bypassSwitch})
+            bypass=$(cat /sys/class/gpio/gpio${bypassSwitch}/value)
             allselections=${s7}${s6}${s5}${s4}${s3}${s2}${s1}${s0}
             echo "T0 allselections: $allselections bypass $bypass"
          done
@@ -271,7 +271,7 @@ function waitForPussyPlay() {
             s5=$(cat /sys/class/gpio/gpio${remote1}/value)
             s6=$(cat /sys/class/gpio/gpio${remote2}/value)
             s7=$(cat /sys/class/gpio/gpio${remote3}/value)
-            bypass=$(cat /sys/class/gpio/gpio${bypassSwitch})
+            bypass=$(cat /sys/class/gpio/gpio${bypassSwitch}/value)
             allselections=${s7}${s6}${s5}${s4}${s3}${s2}${s1}${s0}
             echo "T1 allselections: $allselections bypass $bypass"
          done
