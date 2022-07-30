@@ -11,7 +11,7 @@ import board
 import argparse
 
 # LED pixels configuration:
-num_pixels = 300
+num_pixels = 350
 pixel_pin = board.D12
 ORDER = neopixel.RGB
 
