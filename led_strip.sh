@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# this scripts selects led pattern
 echo 2 > /sys/class/gpio/export 
 echo 3 > /sys/class/gpio/export 
 echo 4 > /sys/class/gpio/export 

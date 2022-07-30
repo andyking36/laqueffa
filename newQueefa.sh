@@ -61,7 +61,7 @@ ledDisplay2=4
 # here are the arrays used to setup
 #♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥
 gpioPussyInputs="$button0 $button1 $button2 $button3 $ogButtonsInSeries"
-gpioBackupPussyInputs="$button4 $button5 $button6 $button7"
+gpioBackupPussyInputs="$button4 $button5 $button6 $button7 $bypassSwitch"
 gpioRemoteInputs="$remote0 $remote1 $remote2 $remote3"
 
 gpioOutputsPumps="$drink0 $drink1 $drink2 $queefaSquirt"
