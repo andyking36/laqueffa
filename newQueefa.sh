@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Adjust time needed to poor a drink, in seconds
-poorTime=5
+poorTime=7
 
 # buttons are regularly open so initialize allselections to zeros
 # number of zeros depends on number of inputs. We are using 8 total.
@@ -12,7 +12,8 @@ allselections=$noSelectionsMade
 # track how many drinks are poored and activate squirt 
 # at "squirtTime"
 drinkCount=0
-squirtTime=5
+squirtTime=20
+squirtSound=1
 
 #***********************************************
 # Setup drink dispensor, LEDs and input buttons to there associated gpio.
@@ -129,30 +130,39 @@ function selectDrink() {
       # remote selections 
       00000001)
           drank=$drink0
-	  ledDisplay=$ledDisplay0;;
+          forceSquirt=0
+	       ledDisplay=$ledDisplay0;;
       00000010)
-	  drank=$drink1
-	  ledDisplay=$ledDisplay0;;
+	       drank=$drink1
+          forceSquirt=0
+	       ledDisplay=$ledDisplay0;;
       00000100)
-	  drank=$drink2
-	  ledDisplay=$ledDisplay0;;
+	       drank=$drink2
+          forceSquirt=0
+	       ledDisplay=$ledDisplay0;;
       00001000)
           drank=$queefaSquirt
-	  ledDisplay=$ledDisplay1;;
+          forceSquirt=0
+	       ledDisplay=$ledDisplay1;;
       # pussy button selections
       00010000)
           drank=$drink0
-	  ledDisplay=$ledDisplay0;;
+          forceSquirt=0
+	       ledDisplay=$ledDisplay0;;
       00100000)
-	  drank=$drink1
-	  ledDisplay=$ledDisplay0;;
+	       drank=$drink1
+          forceSquirt=0
+	       ledDisplay=$ledDisplay0;;
       01000000)
-	  drank=$drink2
-	  ledDisplay=$ledDisplay0;;
+	       drank=$drink2
+          forceSquirt=0
+	       ledDisplay=$ledDisplay0;;
       10000000)
-	  drank=$queefaSquirt
-	  ledDisplay=$ledDisplay1;;
+	       drank=$queefaSquirt
+          forceSquirt=1
+	       ledDisplay=$ledDisplay1;;
          *) echo "false alarm" 
+            forceSquirt=0
             main;;
    esac
    echo "Drink GPIO: $drank"
@@ -202,11 +212,26 @@ function poorDrink() {
 
 function activateSquirt() {
    echo "squirt time"
+   if [ $squirtSound -eq 0 ] ; then
+      sq=slime.time.mp3
+   elif [ $squirtSound -eq 1 ] ; then
+      sq=sad.trombone.mp3
+   elif [ $squirtSound -eq 2 ] ; then
+      sq=psych.mp3
+   elif [ $squirtSound -eq 3 ] ; then
+      sq=oh.wow.mp3
+   else
+      sq=sad.trombone.mp3
+   fi
+   
+   let "squirtSound++"
+   
    echo 1 > /sys/class/gpio/gpio${ledDisplay}/value
    sleep 5		
    echo 0 > /sys/class/gpio/gpio${drank}/value
    sleep 2
-   mplayer /home/pi/Desktop/Sounds_of_La_Queefa/sad.trombone.mp3 & 
+   #mplayer /home/pi/Desktop/Sounds_of_La_Queefa/sad.trombone.mp3 & 
+   mplayer /home/pi/Desktop/Sounds_of_La_Queefa/${sq} & 
    echo 0 > /sys/class/gpio/gpio${ledDisplay}/value
    echo 1 > /sys/class/gpio/gpio${drank}/value
    sleep 0.5 
@@ -222,7 +247,7 @@ function activateSquirt() {
 function waitForPussyPlay() {
   echo "waitForPussyPlay"
    allselections=$noSelectionsMade
-   bypass=$(gpio -g read $bypassSwitch)
+   bypass=$(cat /sys/class/gpio/gpio${bypassSwitch}/value)
    # loop forever
    while true ; do
    
@@ -247,13 +272,18 @@ function waitForPussyPlay() {
          selectDrink $allselections
          allselections=$noSelectionsMade
          # if laqueefa decides to squirt, ledDisplay the sad trumbone song
-         if [ $drank -eq $queefaSquirt ] ; then
-            activateSquirt
-         elif [ $drinkCount -gt $squirtTime ] ; then
+         
+         if [ $drinkCount -gt $squirtTime ] || [ $forceSquirt -eq 1 ] ; then
             drank=$queefaSquirt
             ledDisplay=$ledDisplay1 
             activateSquirt
             drinkCount=0
+         elif [ $drank -eq $queefaSquirt ] ; then
+            let drinkCount=$drinkCount+4
+            drank=$drink0
+            ledDisplay=$ledDisplay0
+            playAudioClip
+            poorDrink $drank $ledDisplay
          else
             playAudioClip
             poorDrink $drank $ledDisplay
